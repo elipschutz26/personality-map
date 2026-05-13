@@ -265,6 +265,15 @@ document.getElementById('reset').addEventListener('click', () => {{
   resetView();
 }});
 </script>
+
+<section style="background:white;border-radius:10px;padding:20px 24px;margin:24px 0 30px;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+    <div style="grid-column:1/-1;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#999;margin-bottom:2px;">How to read this chart</div>
+    <div><h3 style="font-size:13px;font-weight:700;color:#c87941;margin:0 0 6px">How it was made</h3><p style="font-size:13px;color:#555;line-height:1.7;margin:0">Each of the 2,125 characters was scored on 500 personality traits. PCA found the 3 directions of greatest variation and placed each character at coordinates along those axes. No manual arrangement — the positions come entirely from the personality data.</p></div>
+    <div><h3 style="font-size:13px;font-weight:700;color:#c87941;margin:0 0 6px">What you're looking at</h3><p style="font-size:13px;color:#555;line-height:1.7;margin:0">Each dot is one character, colored by franchise. The three axes capture the biggest personality contrasts: villain ↔ hero, goofy ↔ serious, and cool ↔ dorky. Drag to rotate, scroll to zoom, and hover any dot to see the character's name and franchise.</p></div>
+    <div><h3 style="font-size:13px;font-weight:700;color:#c87941;margin:0 0 6px">How to interpret it</h3><p style="font-size:13px;color:#555;line-height:1.7;margin:0">Characters close together in 3D space share a similar overall personality — even if they're from different shows. Franchise clusters reveal how shows tend to populate a consistent region of personality space. Outliers sitting far from their franchise cluster are the characters who break the mold.</p></div>
+  </div>
+</section>
 </body>
 </html>"""
 

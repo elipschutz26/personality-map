@@ -361,6 +361,15 @@ document.getElementById('reset').addEventListener('click', () => {{
   resetView();
 }});
 </script>
+
+<section style="background:white;border-radius:10px;padding:20px 24px;margin:24px 0 30px;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+    <div style="grid-column:1/-1;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#999;margin-bottom:2px;">How to read this chart</div>
+    <div><h3 style="font-size:13px;font-weight:700;color:#c87941;margin:0 0 6px">How it was made</h3><p style="font-size:13px;color:#555;line-height:1.7;margin:0">Each of the 2,125 characters was scored on 500 personality traits from the openpsychometrics "Which Character" dataset. PCA compressed those 500 dimensions into 3 axes that capture the most variation. Each dot is one character, placed purely by their personality scores.</p></div>
+    <div><h3 style="font-size:13px;font-weight:700;color:#c87941;margin:0 0 6px">What you're looking at</h3><p style="font-size:13px;color:#555;line-height:1.7;margin:0">The three axes represent the biggest personality contrasts in the data: villain ↔ hero, goofy ↔ serious, and cool ↔ dorky. Dots are colored by franchise. Hover any dot to see the character's portrait, their top traits, and their most similar and most opposite characters.</p></div>
+    <div><h3 style="font-size:13px;font-weight:700;color:#c87941;margin:0 0 6px">How to interpret it</h3><p style="font-size:13px;color:#555;line-height:1.7;margin:0">Characters close together share a similar personality profile — even across franchises. Use the search bar to find any character and see where they land. The trait filter lets you highlight all characters who score high on a specific trait, revealing clusters you might not expect.</p></div>
+  </div>
+</section>
 </body>
 </html>"""
 

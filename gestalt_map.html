@@ -330,5 +330,14 @@ function flyTo(i) {
 requestAnimationFrame(() => requestAnimationFrame(resize));
 window.addEventListener('resize', resize);
 </script>
+
+<section style="background:white;border-radius:10px;padding:20px 24px;margin:24px 30px 30px;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+    <div style="grid-column:1/-1;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#999;margin-bottom:2px;">How to read this chart</div>
+    <div><h3 style="font-size:13px;font-weight:700;color:#c87941;margin:0 0 6px">How it was made</h3><p style="font-size:13px;color:#555;line-height:1.7;margin:0">Each character was scored on 500 personality traits, then UMAP compressed those into 2D coordinates that preserve neighborhood structure — characters with similar personalities end up nearby. K-means (k=8) grouped them into 8 archetype clusters, each named by its most extreme traits.</p></div>
+    <div><h3 style="font-size:13px;font-weight:700;color:#c87941;margin:0 0 6px">What you're looking at</h3><p style="font-size:13px;color:#555;line-height:1.7;margin:0">Every dot is a real character portrait placed at its UMAP position. The colored ring around each photo shows which of the 8 archetype clusters they belong to (see the legend). Clusters are spread apart so the groupings are easy to see. Dot size is uniform — proximity is what matters.</p></div>
+    <div><h3 style="font-size:13px;font-weight:700;color:#c87941;margin:0 0 6px">How to interpret it</h3><p style="font-size:13px;color:#555;line-height:1.7;margin:0">Faces that appear next to each other share a personality profile, even if they're from completely different shows. Use the search bar to fly to any character. Click a cluster in the legend to isolate it. Hover any face to see their name, franchise, and archetype. Zoom and pan to explore dense regions.</p></div>
+  </div>
+</section>
 </body>
 </html>
