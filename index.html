@@ -250,46 +250,84 @@
 <main>
 
   <section class="viz">
-    <div class="label">Visualization 01 · Character similarity</div>
-    <a class="viz-card" href="character-map/index.html">
-      <div class="img" style="background-image:url('preview/character-map.png')"></div>
+    <div class="label">Visualization 01 · Character portrait map</div>
+    <a class="viz-card" href="character_portrait_map.html">
+      <div class="img" style="background:#1a1a2e; display:flex; align-items:center; justify-content:center;">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="40" r="38" stroke="#2c4d7a" stroke-width="2"/><circle cx="28" cy="34" r="5" fill="#c9573a"/><circle cx="50" cy="26" r="7" fill="#2c4d7a"/><circle cx="40" cy="52" r="4" fill="#4a8c5c"/><circle cx="60" cy="48" r="6" fill="#7a4a9a"/><circle cx="20" cy="52" r="3" fill="#c9573a" opacity="0.6"/></svg>
+      </div>
       <div class="body">
         <h2>Where every character sits in personality space</h2>
-        <p>2,125 fictional characters from movies, books, and TV plotted in 3D personality
-        space. Three axes capture the main directions of variation: villain ↔ hero,
-        goofy ↔ serious, cool ↔ dorky. Search any character to see their soul-twins
-        and most-opposite counterparts.</p>
-        <div class="meta">openpsychometrics "Which Character" · PCA on 500 bipolar trait pairs · interactive Plotly 3D</div>
+        <p>2,125 fictional characters plotted in 3D. Hover any dot to see a portrait,
+        their top personality traits, and their closest soul-twins and opposites across
+        franchises. Color-coded by show, searchable by name.</p>
+        <div class="meta">PCA on 500 BAP trait pairs · Plotly 3D · hover portraits</div>
         <div class="arrow">Explore the map →</div>
       </div>
     </a>
   </section>
 
   <section class="viz">
-    <div class="label">Visualization 02 · Content market</div>
-    <a class="viz-card flip" href="youtube-galaxy/index.html">
-      <div class="img" style="background-image:url('preview/youtube-galaxy.png')"></div>
+    <div class="label">Visualization 02 · Gestalt portrait map</div>
+    <a class="viz-card flip" href="gestalt_map.html">
+      <div class="img" style="background:#111; display:flex; align-items:center; justify-content:center;">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none"><rect x="10" y="10" width="18" height="18" rx="9" fill="#c9573a" opacity="0.8"/><rect x="32" y="18" width="14" height="14" rx="7" fill="#2c4d7a" opacity="0.8"/><rect x="52" y="8" width="20" height="20" rx="10" fill="#4a8c5c" opacity="0.8"/><rect x="14" y="38" width="16" height="16" rx="8" fill="#7a4a9a" opacity="0.8"/><rect x="46" y="36" width="22" height="22" rx="11" fill="#c9573a" opacity="0.6"/></svg>
+      </div>
       <div class="body">
-        <h2>The shape of personality content on YouTube</h2>
-        <p>758 personality-typology videos from 240 channels, embedded in 2D by
-        title-and-description similarity. The galaxy shows the seven framework clusters
-        emerging naturally from the language alone. Four supporting panels quantify
-        what gets posted, what gets watched, and which hooks actually go viral.</p>
-        <div class="meta">YouTube Data API + Claude Haiku tagging · UMAP gestalt + 4 analysis panels</div>
-        <div class="arrow">Open the dashboard →</div>
+        <h2>Character portraits arranged by personality</h2>
+        <p>Every character's actual photo placed at its UMAP position — nearby faces
+        share a personality profile. Eight color-coded archetype clusters emerge from
+        the data. Zoom, pan, hover, and search to navigate 2,125 portraits at once.</p>
+        <div class="meta">UMAP 2D · K-means k=8 · HTML5 Canvas · zoomable portrait collage</div>
+        <div class="arrow">Open the collage →</div>
       </div>
     </a>
   </section>
 
-  <a class="side-card" href="sample-review/index.html">
-    <div class="img" style="background-image:url('preview/sample-review.png')"></div>
+  <section class="viz">
+    <div class="label">Visualization 03 · Franchise profiles</div>
+    <a class="viz-card" href="franchise_profiles.html">
+      <div class="img" style="background:#faf8f4; display:flex; align-items:center; justify-content:center;">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none"><polygon points="40,8 54,28 72,32 58,48 62,68 40,58 18,68 22,48 8,32 26,28" stroke="#2c4d7a" stroke-width="2" fill="none"/><polygon points="40,18 50,32 62,35 53,46 56,60 40,53 24,60 27,46 18,35 30,32" fill="#2c4d7a" opacity="0.15"/></svg>
+      </div>
+      <div class="body">
+        <h2>Personality fingerprints for every franchise</h2>
+        <p>Compare any two franchises on 12 core traits — Heroic, Kind, Wise, Bold, and
+        more — via an interactive radar chart. A heatmap shows all 25 franchises at a
+        glance, and a PCA scatter plots which shows share a similar cast personality.</p>
+        <div class="meta">12 curated BAP traits · radar · heatmap · franchise PCA scatter</div>
+        <div class="arrow">Compare franchises →</div>
+      </div>
+    </a>
+  </section>
+
+  <section class="viz">
+    <div class="label">Visualization 04 · Archetype clusters</div>
+    <a class="viz-card flip" href="character_archetypes.html">
+      <div class="img" style="background:#f5f0ff; display:flex; align-items:center; justify-content:center;">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none"><circle cx="22" cy="24" r="12" fill="#7a4a9a" opacity="0.3" stroke="#7a4a9a" stroke-width="1.5"/><circle cx="58" cy="22" r="10" fill="#2c4d7a" opacity="0.3" stroke="#2c4d7a" stroke-width="1.5"/><circle cx="20" cy="58" r="11" fill="#c9573a" opacity="0.3" stroke="#c9573a" stroke-width="1.5"/><circle cx="56" cy="56" r="13" fill="#4a8c5c" opacity="0.3" stroke="#4a8c5c" stroke-width="1.5"/></svg>
+      </div>
+      <div class="body">
+        <h2>Eight personality archetypes across all fiction</h2>
+        <p>K-means clustering groups all 2,125 characters into 8 named archetypes —
+        The Hero, The Trickster, The Sage, and more. See which characters define each
+        cluster and how the archetypes differ on key traits.</p>
+        <div class="meta">K-means k=8 · UMAP 2D · archetype naming from BAP extremes</div>
+        <div class="arrow">Explore archetypes →</div>
+      </div>
+    </a>
+  </section>
+
+  <a class="side-card" href="ranking_insights.html">
+    <div class="img" style="background:#f0f4ff; width:220px; aspect-ratio:16/10; display:flex; align-items:center; justify-content:center; border-radius:3px; flex-shrink:0;">
+      <svg width="60" height="60" viewBox="0 0 60 60" fill="none"><line x1="10" y1="30" x2="50" y2="30" stroke="#2c4d7a" stroke-width="1.5"/><line x1="30" y1="10" x2="30" y2="50" stroke="#2c4d7a" stroke-width="1.5"/><circle cx="18" cy="22" r="4" fill="#c9573a" opacity="0.8"/><circle cx="42" cy="18" r="3" fill="#2c4d7a" opacity="0.8"/><circle cx="14" cy="40" r="5" fill="#4a8c5c" opacity="0.8"/><circle cx="46" cy="38" r="3.5" fill="#7a4a9a" opacity="0.8"/></svg>
+    </div>
     <div class="body">
-      <div class="label">Side study · Format review</div>
-      <h3>What does the content actually look like?</h3>
-      <p>The metadata view tells us what gets posted and watched. This tells us what it
-      <em>looks</em> like. 4 frames each from 42 representative videos across the seven
-      framework clusters — text overlays, talking-head vs animation, Shorts vs long-form.</p>
-      <div class="arrow">See the contact sheet →</div>
+      <div class="label">Side study · Human similarity ratings</div>
+      <h3>Do people agree with the algorithm?</h3>
+      <p>147,555 survey respondents rated cross-franchise character pairs on similarity.
+      This analysis compares those human judgments against the BAP-computed distances —
+      and finds the pairs people agree on most.</p>
+      <div class="arrow">See the analysis →</div>
     </div>
   </a>
 
