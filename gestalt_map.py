@@ -130,8 +130,7 @@ html = f"""<!DOCTYPE html>
 <style>
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-          background: #111; color: #eee; height: 100vh; overflow: hidden;
-          display: flex; flex-direction: column; }}
+          background: #111; color: #eee; }}
   #topbar {{ padding: 10px 16px; background: #1a1a1a; border-bottom: 1px solid #333;
              display: flex; align-items: center; gap: 16px; flex-shrink: 0; z-index: 10; }}
   #topbar h1 {{ font-size: 16px; font-weight: 600; white-space: nowrap; }}
@@ -143,7 +142,7 @@ html = f"""<!DOCTYPE html>
   .legend-item:hover {{ background: rgba(255,255,255,0.08); }}
   .legend-item.dimmed {{ opacity: 0.35; }}
   .legend-dot {{ width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }}
-  #canvas-wrap {{ flex: 1; position: relative; overflow: hidden; cursor: grab; }}
+  #canvas-wrap {{ height: calc(100vh - 52px); position: relative; overflow: hidden; cursor: grab; }}
   #canvas-wrap.dragging {{ cursor: grabbing; }}
   canvas {{ position: absolute; top: 0; left: 0; }}
   #tooltip {{ position: fixed; background: rgba(20,20,20,0.95); border: 1px solid #444;
