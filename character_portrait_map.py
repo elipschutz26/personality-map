@@ -200,23 +200,34 @@ html = f"""<!DOCTYPE html>
   .hint {{ color: #555; font-size: 13px; }}
   .sep {{ color: #aaa; }}
   #status b {{ color: #c0392b; }}
-  .main {{ display: flex; height: calc(100vh - 52px); overflow: hidden; }}
-  #plot-wrap {{ flex: 1; }}
-  #sidebar {{ width: 260px; flex-shrink: 0; background: white; border-left: 1px solid #ddd;
-              padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }}
-  #sidebar h3 {{ margin: 0; font-size: 16px; }}
-  #sidebar .source-tag {{ font-size: 12px; color: #888; margin-top: 2px; }}
-  #portrait-img {{ width: 100%; border-radius: 8px; object-fit: cover; background: #eee;
-                   min-height: 120px; display: block; }}
-  .no-img {{ width: 100%; height: 140px; background: #eee; border-radius: 8px;
-             display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 13px; }}
-  .trait-list {{ list-style: none; margin: 0; padding: 0; }}
-  .trait-list li {{ padding: 4px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }}
-  .trait-list li:last-child {{ border-bottom: none; }}
-  .trait-bar {{ display: inline-block; height: 8px; background: #3498db; border-radius: 4px;
-                margin-right: 6px; vertical-align: middle; }}
-  .similar-list {{ font-size: 12px; color: #555; line-height: 1.6; }}
-  .empty-state {{ color: #aaa; font-size: 13px; text-align: center; margin-top: 40px; }}
+  .main {{ height: calc(100vh - 52px); }}
+  #plot-wrap {{ width: 100%; height: 100%; }}
+  #hover-tooltip {{
+    position: fixed; display: none; z-index: 1000; pointer-events: none;
+    width: 230px; background: white; border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18); overflow: hidden;
+    border: 1px solid #e8e8e8;
+  }}
+  #hover-tooltip .tt-portrait {{
+    width: 100%; height: 160px; object-fit: cover; display: block; background: #eee;
+  }}
+  #hover-tooltip .tt-no-img {{
+    width: 100%; height: 100px; background: #eee;
+    display: flex; align-items: center; justify-content: center; color: #bbb; font-size: 13px;
+  }}
+  #hover-tooltip .tt-body {{ padding: 12px 14px; }}
+  #hover-tooltip .tt-name {{ font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 2px; }}
+  #hover-tooltip .tt-src {{ font-size: 12px; color: #888; margin-bottom: 10px; }}
+  #hover-tooltip .tt-traits {{ list-style: none; margin: 0; padding: 0; }}
+  #hover-tooltip .tt-traits li {{
+    font-size: 12px; color: #444; padding: 3px 0;
+    border-bottom: 1px solid #f5f5f5; display: flex; align-items: center; gap: 6px;
+  }}
+  #hover-tooltip .tt-traits li:last-child {{ border-bottom: none; }}
+  #hover-tooltip .tt-bar {{
+    display: inline-block; height: 6px; background: #3498db; border-radius: 3px; flex-shrink: 0;
+  }}
+  #hover-tooltip .tt-similar {{ font-size: 11px; color: #999; margin-top: 8px; line-height: 1.5; }}
 </style>
 </head>
 <body>
@@ -235,8 +246,14 @@ html = f"""<!DOCTYPE html>
 </div>
 <div class="main">
   <div id="plot-wrap">{plot_div}</div>
-  <div id="sidebar">
-    <div class="empty-state">Hover over a character<br>to see their portrait<br>and personality traits</div>
+</div>
+<div id="hover-tooltip">
+  <img class="tt-portrait" id="tt-img" src="" alt="">
+  <div class="tt-body">
+    <div class="tt-name" id="tt-name"></div>
+    <div class="tt-src" id="tt-src"></div>
+    <ul class="tt-traits" id="tt-traits"></ul>
+    <div class="tt-similar" id="tt-similar"></div>
   </div>
 </div>
 <script>
@@ -250,41 +267,55 @@ const adjectiveToChars = {json.dumps(adjective_to_chars)};
 const imgPaths = {json.dumps(img_paths)};
 const charTraits = {json.dumps(char_traits)};
 
-// Map char_id -> source name (first part before /)
 function getSource(cid) {{ return cid.split('/')[0]; }}
 
-function renderSidebar(cid) {{
+let mouseX = 0, mouseY = 0;
+document.addEventListener('mousemove', e => {{ mouseX = e.clientX; mouseY = e.clientY; }});
+
+const tooltip = document.getElementById('hover-tooltip');
+
+function showTooltip(cid) {{
   const name = idToName[cid] || cid;
   const src = getSource(cid);
   const img = imgPaths[cid];
   const traits = charTraits[cid] || [];
   const close = (simData[cid] || {{}}).close || [];
 
-  const imgHtml = img
-    ? `<img id="portrait-img" src="${{img}}" alt="${{name}}" onerror="this.style.display='none'">`
-    : `<div class="no-img">No image</div>`;
+  const ttImg = document.getElementById('tt-img');
+  if (img) {{
+    ttImg.src = img;
+    ttImg.style.display = 'block';
+    ttImg.onerror = () => {{ ttImg.style.display = 'none'; }};
+  }} else {{
+    ttImg.style.display = 'none';
+  }}
 
-  const traitItems = traits.map(t => {{
-    const match = t.match(/(.+) \\((\\d+)\\)/);
+  document.getElementById('tt-name').textContent = name;
+  document.getElementById('tt-src').textContent = src;
+
+  document.getElementById('tt-traits').innerHTML = traits.map(t => {{
+    const match = t.match(/(.+) \((\\d+)\)/);
     if (!match) return `<li>${{t}}</li>`;
     const word = match[1], val = parseInt(match[2]);
-    const barW = Math.round((Math.abs(val - 50) / 50) * 80);
-    return `<li><span class="trait-bar" style="width:${{barW}}px"></span>${{word}} <span style="color:#999">(${{val}})</span></li>`;
+    const barW = Math.round((Math.abs(val - 50) / 50) * 60);
+    return `<li><span class="tt-bar" style="width:${{barW}}px"></span>${{word}} <span style="color:#bbb">(${{val}})</span></li>`;
   }}).join('');
 
-  const closeNames = close.slice(0, 5).map(c => idToName[c] || c).join(', ');
+  const closeNames = close.slice(0, 4).map(c => idToName[c] || c).join(', ');
+  document.getElementById('tt-similar').textContent = closeNames ? `Similar to: ${{closeNames}}` : '';
 
-  document.getElementById('sidebar').innerHTML = `
-    <h3>${{name}}</h3>
-    <div class="source-tag">${{src}}</div>
-    ${{imgHtml}}
-    <div><b style="font-size:13px">Top traits:</b>
-      <ul class="trait-list">${{traitItems}}</ul>
-    </div>
-    <div><b style="font-size:13px">Most similar to:</b>
-      <div class="similar-list">${{closeNames}}</div>
-    </div>`;
+  const W = 230, vw = window.innerWidth, vh = window.innerHeight;
+  const H = tooltip.offsetHeight || 320;
+  let left = mouseX + 16;
+  let top = mouseY - 20;
+  if (left + W > vw - 10) left = mouseX - W - 16;
+  if (top + H > vh - 10) top = vh - H - 10;
+  tooltip.style.left = left + 'px';
+  tooltip.style.top = top + 'px';
+  tooltip.style.display = 'block';
 }}
+
+function hideTooltip() {{ tooltip.style.display = 'none'; }}
 
 function applyFilter(focalId) {{
   const focalName = idToName[focalId] || focalId;
@@ -298,7 +329,6 @@ function applyFilter(focalId) {{
     const sizes = cids.map(cid => cid === focalId ? 12 : visible.has(cid) ? 6 : 0);
     Plotly.restyle('plot', {{'marker.size': [sizes]}}, [idx]);
   }}
-  renderSidebar(focalId);
   const closeNames = close.slice(0, 5).map(cid => idToName[cid] || cid).join(', ');
   document.getElementById('status').innerHTML =
     `Focused on <b>${{focalName}}</b> — 10 closest + 10 most-opposite shown`;
@@ -311,10 +341,9 @@ function resetView() {{
     const sizes = cids.map(_ => traceDefaultSize[k]);
     Plotly.restyle('plot', {{'marker.size': [sizes]}}, [idx]);
   }}
+  hideTooltip();
   document.getElementById('status').textContent =
-    `{len(scores)} characters shown. Hover over a dot to see the portrait, or search above.`;
-  document.getElementById('sidebar').innerHTML =
-    '<div class="empty-state">Hover over a character<br>to see their portrait<br>and personality traits</div>';
+    `{len(scores)} characters shown. Hover over a dot to see portrait and traits, or search above.`;
 }}
 
 function applyTraitFilter(adjective) {{
@@ -329,15 +358,13 @@ function applyTraitFilter(adjective) {{
   }}
   document.getElementById('status').innerHTML =
     `Top 10 most <b>${{adjective}}</b>: ${{focal.map(cid => idToName[cid] || cid).join(', ')}}`;
-  if (focal.length > 0) renderSidebar(focal[0]);
 }}
 
-// Hover event → update sidebar
 document.getElementById('plot').on('plotly_hover', (data) => {{
-  const pt = data.points[0];
-  const cid = pt.customdata;
-  if (cid) renderSidebar(cid);
+  const cid = data.points[0].customdata;
+  if (cid) showTooltip(cid);
 }});
+document.getElementById('plot').on('plotly_unhover', () => hideTooltip());
 
 document.getElementById('search').addEventListener('change', (e) => {{
   const id = nameToId[e.target.value.trim()];
