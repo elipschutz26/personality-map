@@ -41,7 +41,7 @@ def get_img(cid):
     if len(parts) == 2:
         f = PICS_ROOT / parts[0] / f"{parts[1]}.jpg"
         if f.exists():
-            return f.as_uri()
+            return f"pics/{parts[0]}/{parts[1]}.jpg"
     return None
 
 print("Loading ranking data...")
@@ -244,6 +244,36 @@ for (a, b), info in valid_pairs[:10]:
       {portrait_card(b)}
     </div>'''
 
+# Build JSON blobs for client-side search
+# char_list: [{id, name, src, img}] sorted by name
+char_list_json = json.dumps([
+    {"id": cid, "name": id_to_name.get(cid, cid), "src": cid.split("/")[0], "img": get_img(cid) or ""}
+    for cid in sorted(scores.index, key=lambda c: id_to_name.get(c, c))
+])
+
+# pairs_by_char: {cid: [{other_id, other_name, other_src, other_img, sim, count}]}
+pairs_by_char = defaultdict(list)
+for (a, b), info in valid_pairs:
+    for me, other in [(a, b), (b, a)]:
+        pairs_by_char[me].append({
+            "id": other,
+            "name": id_to_name.get(other, other),
+            "src": other.split("/")[0],
+            "img": get_img(other) or "",
+            "sim": round(info["mean"], 1),
+            "count": info["count"],
+        })
+# sort each list by sim desc
+for k in pairs_by_char:
+    pairs_by_char[k].sort(key=lambda x: -x["sim"])
+pairs_by_char_json = json.dumps(dict(pairs_by_char))
+
+# pair_lookup: {"A|||B": {sim, count}} where key is sorted
+pair_lookup = {}
+for (a, b), info in valid_pairs:
+    pair_lookup[f"{a}|||{b}"] = {"sim": round(info["mean"], 1), "count": info["count"]}
+pair_lookup_json = json.dumps(pair_lookup)
+
 html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -262,6 +292,63 @@ html = f"""<!DOCTYPE html>
   .stat-box {{ flex: 1; padding: 16px; background: #f5f5f5; border-radius: 8px; text-align: center; }}
   .stat-num {{ font-size: 28px; font-weight: 700; color: #2c3e50; }}
   .stat-label {{ font-size: 13px; color: #666; margin-top: 4px; }}
+
+  .search-row {{ display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; margin-bottom: 16px; }}
+  .ac-wrap {{ position: relative; flex: 1; min-width: 200px; }}
+  .ac-wrap input {{
+    width: 100%; padding: 9px 14px; font-size: 15px;
+    border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box;
+    outline: none; transition: border-color .15s;
+  }}
+  .ac-wrap input:focus {{ border-color: #3498db; }}
+  .ac-dropdown {{
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+    background: white; border: 1px solid #ddd; border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12); z-index: 999;
+    max-height: 260px; overflow-y: auto; display: none;
+  }}
+  .ac-item {{
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; cursor: pointer; font-size: 14px;
+  }}
+  .ac-item:hover {{ background: #f0f6ff; }}
+  .ac-item img {{ width: 36px; height: 36px; object-fit: cover; border-radius: 4px; background: #eee; }}
+  .ac-item .ac-name {{ font-weight: 600; }}
+  .ac-item .ac-src {{ font-size: 11px; color: #999; }}
+  .search-btn {{
+    padding: 9px 20px; font-size: 15px; font-weight: 600;
+    background: #3498db; color: white; border: none; border-radius: 8px;
+    cursor: pointer; white-space: nowrap; align-self: flex-start; margin-top: 0;
+  }}
+  .search-btn:hover {{ background: #2980b9; }}
+  .pair-card {{
+    display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+    background: #f9f9f9; border-radius: 10px; margin-bottom: 10px; border: 1px solid #eee;
+  }}
+  .pair-card .portrait {{ text-align: center; flex-shrink: 0; }}
+  .pair-card .portrait img {{ width: 70px; height: 70px; object-fit: cover; border-radius: 8px; background: #ddd; }}
+  .pair-card .portrait .no-img {{ width: 70px; height: 70px; background: #ddd; border-radius: 8px; }}
+  .pair-card .portrait .p-name {{ font-size: 11px; margin-top: 4px; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }}
+  .pair-card .portrait .p-src {{ font-size: 10px; color: #888; }}
+  .pair-card .middle {{ text-align: center; flex: 1; }}
+  .pair-card .middle .sim-score {{ font-size: 22px; }}
+  .pair-card .middle .sim-pct {{ font-size: 13px; font-weight: 600; }}
+  .pair-card .middle .sim-cnt {{ font-size: 11px; color: #888; }}
+  #search-results, #pair-results {{ margin-top: 12px; }}
+  .no-result {{ color: #999; font-size: 14px; padding: 12px 0; }}
+  .result-count {{ font-size: 13px; color: #888; margin-bottom: 10px; }}
+  .pair-result-box {{
+    display: flex; align-items: center; gap: 16px; padding: 16px 20px;
+    background: #f0f6ff; border-radius: 12px; border: 2px solid #3498db;
+  }}
+  .pair-result-box img {{ width: 80px; height: 80px; object-fit: cover; border-radius: 10px; background: #ddd; }}
+  .pair-result-box .no-img {{ width: 80px; height: 80px; background: #ddd; border-radius: 10px; flex-shrink:0; }}
+  .pair-result-box .pr-name {{ font-weight: 700; font-size: 15px; }}
+  .pair-result-box .pr-src {{ font-size: 12px; color: #888; }}
+  .pair-result-box .pr-vs {{ font-size: 28px; color: #bbb; flex: 1; text-align: center; }}
+  .pair-result-box .pr-score {{ text-align: center; padding: 0 16px; }}
+  .pair-result-box .pr-pct {{ font-size: 36px; font-weight: 700; color: #3498db; }}
+  .pair-result-box .pr-label {{ font-size: 12px; color: #888; }}
 </style>
 </head>
 <body>
@@ -289,6 +376,36 @@ html = f"""<!DOCTYPE html>
 </div>
 
 <section>
+  <h2>Search: Who is most similar to a character?</h2>
+  <p style="color:#666;font-size:13px">Type a character name to see all their rated pairs, sorted by similarity.</p>
+  <div class="search-row">
+    <div class="ac-wrap">
+      <input id="char-input" type="text" placeholder="e.g. Hermione Granger, Tony Stark…" autocomplete="off">
+      <div class="ac-dropdown" id="char-dropdown"></div>
+    </div>
+  </div>
+  <div id="search-results"></div>
+</section>
+
+<section>
+  <h2>Search: How similar are two specific characters?</h2>
+  <p style="color:#666;font-size:13px">Pick any two characters to see their human-rated similarity score.</p>
+  <div class="search-row">
+    <div class="ac-wrap">
+      <input id="pair-input-a" type="text" placeholder="Character A" autocomplete="off">
+      <div class="ac-dropdown" id="pair-dropdown-a"></div>
+    </div>
+    <div style="padding:9px 4px;font-size:18px;color:#aaa;align-self:flex-start">vs</div>
+    <div class="ac-wrap">
+      <input id="pair-input-b" type="text" placeholder="Character B" autocomplete="off">
+      <div class="ac-dropdown" id="pair-dropdown-b"></div>
+    </div>
+    <button class="search-btn" onclick="lookupPair()">Compare</button>
+  </div>
+  <div id="pair-results"></div>
+</section>
+
+<section>
   <h2>Most Similar Character Pairs (Portrait Gallery)</h2>
   <p style="color:#666;font-size:13px">Top 10 pairs rated most similar by survey respondents</p>
   {pair_cards_html}
@@ -310,6 +427,120 @@ html = f"""<!DOCTYPE html>
   <p style="color:#666;font-size:13px">Characters from <em>different</em> shows/movies that people rated as highly similar</p>
   {bar3_div}
 </section>
+
+<script>
+const charList = {char_list_json};
+const pairsByChar = {pairs_by_char_json};
+const pairLookup = {pair_lookup_json};
+
+// ── Autocomplete engine ──
+function makeAC(inputEl, dropdownEl, onSelect) {{
+  let selected = null;
+  inputEl.addEventListener('input', () => {{
+    selected = null;
+    const q = inputEl.value.trim().toLowerCase();
+    if (q.length < 1) {{ dropdownEl.style.display = 'none'; return; }}
+    const hits = charList.filter(c => c.name.toLowerCase().includes(q)).slice(0, 8);
+    if (!hits.length) {{ dropdownEl.style.display = 'none'; return; }}
+    dropdownEl.innerHTML = hits.map(c => `
+      <div class="ac-item" data-id="${{c.id}}">
+        ${{c.img ? `<img src="${{c.img}}" onerror="this.style.display='none'">` : '<div style="width:36px;height:36px;background:#eee;border-radius:4px;flex-shrink:0"></div>'}}
+        <div><div class="ac-name">${{c.name}}</div><div class="ac-src">${{c.src}}</div></div>
+      </div>`).join('');
+    dropdownEl.style.display = 'block';
+    dropdownEl.querySelectorAll('.ac-item').forEach(el => {{
+      el.addEventListener('mousedown', e => {{
+        e.preventDefault();
+        const id = el.dataset.id;
+        const ch = charList.find(c => c.id === id);
+        inputEl.value = ch.name;
+        dropdownEl.style.display = 'none';
+        selected = ch;
+        onSelect(ch);
+      }});
+    }});
+  }});
+  inputEl.addEventListener('blur', () => setTimeout(() => dropdownEl.style.display = 'none', 150));
+  return {{ getSelected: () => selected }};
+}}
+
+// ── Portrait card builder ──
+function portraitCard(c) {{
+  return `<div class="portrait">
+    ${{c.img ? `<img src="${{c.img}}" onerror="this.outerHTML='<div class=\\"no-img\\"></div>'">` : '<div class="no-img"></div>'}}
+    <div class="p-name">${{c.name}}</div>
+    <div class="p-src">${{c.src}}</div>
+  </div>`;
+}}
+
+// ── Character search ──
+const charAC = makeAC(
+  document.getElementById('char-input'),
+  document.getElementById('char-dropdown'),
+  (ch) => {{
+    const results = document.getElementById('search-results');
+    const pairs = pairsByChar[ch.id];
+    if (!pairs || pairs.length === 0) {{
+      results.innerHTML = '<p class="no-result">No rated pairs found for this character.</p>';
+      return;
+    }}
+    results.innerHTML = `<div class="result-count">Showing ${{pairs.length}} rated pairs for <strong>${{ch.name}}</strong>, sorted by similarity</div>` +
+      pairs.map(p => `
+        <div class="pair-card">
+          ${{portraitCard(ch)}}
+          <div class="middle">
+            <div class="sim-score">≈</div>
+            <div class="sim-pct">${{p.sim}}% similar</div>
+            <div class="sim-cnt">${{p.count}} ratings</div>
+          </div>
+          ${{portraitCard(p)}}
+        </div>`).join('');
+  }}
+);
+
+// ── Pair lookup ──
+let pairSelA = null, pairSelB = null;
+makeAC(document.getElementById('pair-input-a'), document.getElementById('pair-dropdown-a'), ch => pairSelA = ch);
+makeAC(document.getElementById('pair-input-b'), document.getElementById('pair-dropdown-b'), ch => pairSelB = ch);
+
+function lookupPair() {{
+  const results = document.getElementById('pair-results');
+  if (!pairSelA || !pairSelB) {{
+    results.innerHTML = '<p class="no-result">Please select both characters from the dropdown.</p>';
+    return;
+  }}
+  if (pairSelA.id === pairSelB.id) {{
+    results.innerHTML = '<p class="no-result">Please select two different characters.</p>';
+    return;
+  }}
+  const key = [pairSelA.id, pairSelB.id].sort().join('|||');
+  const info = pairLookup[key];
+  if (!info) {{
+    results.innerHTML = `<p class="no-result">No data found for <strong>${{pairSelA.name}}</strong> & <strong>${{pairSelB.name}}</strong> — this pair wasn't rated by enough respondents (minimum {MIN_RATINGS}).</p>`;
+    return;
+  }}
+  results.innerHTML = `
+    <div class="pair-result-box">
+      ${{pairSelA.img ? `<img src="${{pairSelA.img}}" onerror="this.outerHTML='<div class=\\"no-img\\"></div>'">` : '<div class="no-img"></div>'}}
+      <div>
+        <div class="pr-name">${{pairSelA.name}}</div>
+        <div class="pr-src">${{pairSelA.src}}</div>
+      </div>
+      <div class="pr-vs">≈</div>
+      <div class="pr-score">
+        <div class="pr-pct">${{info.sim}}%</div>
+        <div class="pr-label">similar</div>
+        <div class="pr-label">${{info.count}} ratings</div>
+      </div>
+      <div class="pr-vs">≈</div>
+      <div>
+        <div class="pr-name">${{pairSelB.name}}</div>
+        <div class="pr-src">${{pairSelB.src}}</div>
+      </div>
+      ${{pairSelB.img ? `<img src="${{pairSelB.img}}" onerror="this.outerHTML='<div class=\\"no-img\\"></div>'">` : '<div class="no-img"></div>'}}
+    </div>`;
+}}
+</script>
 </body>
 </html>"""
 
