@@ -59,7 +59,7 @@ for cid in scores.index:
         src, num = parts
         img_file = PICS_ROOT / src / f"{num}.jpg"
         if img_file.exists():
-            img_paths[cid] = img_file.as_uri()
+            img_paths[cid] = f"pics/{src}/{num}.jpg"
 
 # Precompute top 5 most extreme traits for each character
 # "extreme" = furthest from 50 (neutral midpoint)

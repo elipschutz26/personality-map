@@ -36,7 +36,7 @@ for cid in scores.index:
         src, num = parts
         img_file = PICS_ROOT / src / f"{num}.jpg"
         if img_file.exists():
-            img_paths[cid] = img_file.as_uri()
+            img_paths[cid] = f"pics/{src}/{num}.jpg"
 
 print("Running K-means clustering...")
 scaler = StandardScaler()
